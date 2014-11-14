@@ -1,6 +1,6 @@
 #include <ncurses.h>
-#include <time.h>
-
+#include <unistd.h>
+#include <stdio.h>
 typedef struct
 {
 	int brick[3][3];
@@ -38,9 +38,10 @@ int main()
 	printw("Tetris\n");
 	int positionX, positionY;
 	positionX = 4;
-	while(reachTop != 50)
-	{
-	
+	while(reachTop != 20)
+	{		
+		printw("im here printw ");
+		printf("im here printf");
 		printw("\n");
 			int i , j, n;
 		    for (i = 0; i < 20; i++) {
@@ -56,19 +57,15 @@ int main()
 		{
 		printw("_");
 		}
-		
-	/*	for(int i = 0; i < 3; i++)
-		{
-			for(int j = 0; j < 3; i++)
-			{
-			board[positionX + i][j + positionY] = line[i][j];
-			}
-		} */
 
+	  	positionY++;
+		
+		printf("timer start");
+		napms(1000);
+
+		printf("timer end");
+		refresh();
 		reachTop++;
-		positionY++;
-		sleep(0,1);
-		//erase();
 	}
 
 	getch();
