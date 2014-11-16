@@ -62,6 +62,7 @@ int main()
 		
 		printf("timer start");
 		napms(1000);
+
 		printf("timer end");
 		refresh();
 		reachTop++;
