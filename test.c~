@@ -4,45 +4,76 @@
 #define delay 9000
 #define WIDTH 10
 #define HEIGHT 20 
+#define BRICKWIDTH 10
+#define BRICKHEIGHT 20 
+
+struct brickData
+{
+	char brick[3][3];
+	int color;
+}; 
 
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 
 int main() 
 {
 	int x = 0, y = 0;
-	int max_y = 0, max_x = 0;
-	int next_x = 0;
+	int maxY = 0, maxX = 0;
 	int direction = 1;
 
-	char line[3][3] = {{'0','#','0'},{'0','#','0'},{'0','#','0'}};
-	char square[3][3] = {{'0','0','0'},{'0','#','#'},{'0','#','#'}};
-	char sBrick[3][3] = {{'0','0','0'},{'0','#','#'},{'#','#','0'}};
-	char zBrick[3][3] = {{'0','0','0'},{'#','#','0'},{'0','#','#'}};
-	char tBrick[3][3] = {{'0','0','0'},{'0','#','0'},{'#','#','#'}};
-	char LBrick[3][3] = {{'#','#','0'},{'0','#','0'},{'0','#','0'}};
-	char bLBrick[3][3] = {{'0','#','0'},{'0','#','0'},{'#','#','0'}};
+	char line[3][3] = {{' ','#',' '},{' ','#',' '},{' ','#',' '}};
+	char square[3][3] = {{' ',' ',' '},{' ','#','#'},{' ','#','#'}};
+	char sBrick[3][3] = {{' ',' ',' '},{' ','#','#'},{'#','#',' '}};
+	char zBrick[3][3] = {{' ',' ',' '},{'#','#',' '},{' ','#','#'}};
+	char tBrick[3][3] = {{' ',' ',' '},{' ','#',' '},{'#','#','#'}};
+	char LBrick[3][3] = {{'#','#',' '},{' ','#',' '},{' ','#',' '}};
+	char bLBrick[3][3] = {{' ','#',' '},{' ','#',' '},{'#','#',' '}};
+
+	init_pair(1, COLOR_CYAN, COLOR_CYAN);
+	init_pair(2, COLOR_YELLOW, COLOR_YELLOW);
+	init_pair(3, COLOR_GREEN, COLOR_GREEN);
+	init_pair(4, COLOR_RED, COLOR_RED);
+	init_pair(5, COLOR_MAGENTA, COLOR_MAGENTA);
+	init_pair(6, COLOR_BLUE, COLOR_BLUE);
+	init_pair(7, COLOR_WHITE, COLOR_WHITE);
 
 	initscr();
 	noecho();
 	cbreak();
 	curs_set(FALSE);	
-	getmaxyx(stdscr, max_x, max_y);	
+	maxX = WIDTH;
+	maxY = HEIGHT;
 	keypad(stdscr, TRUE);	
 	nodelay(stdscr, TRUE);
+	char turnX = 'j', turnY = 'i';
 
-	char board[20][10];
+	char board[HEIGHT][WIDTH];
+	x = 4;
+	
+	srand(time(NULL));
+	int r = rand() % 7;
+
+	/*struct brickData currentBrickArray[100];
+	int g;
+	for(g = 0; g <= 100; g++)
+	{
+		currentBrickArray[g].brick = tBrick;
+		currentBrickArray[g].color = r;
+	}*/
+	
+	int brickNumber = 0;
 
 	while(1)
 	{
 
 		clear();
 		int i , j, n;
-		for (i = 0; i < 20; i++) 
+		for (i = 0; i < HEIGHT; i++) 
 		{
 		printw("|");
-			for (j = 0; j < 10; j++) 
+			for (j = 0; j < WIDTH; j++) 
 			{
-				board[i][j] = '.';
+				board[i][j] = ' ';
 				printw("%c ", board[i][j]);
 			}	
 		printw("|");
@@ -53,21 +84,33 @@ int main()
 		{
 			printw("_");
 		}
-
-		//mvprintw(y,x,"###");
 		refresh();
 		
-		for (i = 0; i < 3; i++)
+		attron(COLOR_PAIR(1)); //farge funker ikke.. must fix
+		for (i = 0; i < BRICKHEIGHT; i++)
 		{
-			for(j = 0; j < 3; j++)
-			{
-				mvprintw(y, x,"%c", tBrick[i][j]);			
+			for(j = 0; j < BRICKWIDTH; j++)
+			{	
+				
+				board[i+y][j-2] = mvprintw(y+i, x+j,"%c", tBrick[i][j]);			
 
 			}
-			mvprintw(y,x,"\n");
 		}
+
+		/*if((y+BRICKHEIGHT) == HEIGHT)
+		{
+		x = 4;
+		y = 0;
+		brickNumber ++;		
+		}
+		else
+		{
+			y++;
+		}*/
+		y++;
+		attroff(COLOR_PAIR(1));
 		refresh();
-		usleep(100);
+		sleep(1);
 	
 		int ch = mvgetch(x, y);
      		switch (ch) {
@@ -78,7 +121,16 @@ int main()
 			x++;
 			break;
 		case KEY_UP:  
-   			y--;
+			for (i = y; i < 3; i++)
+			{
+				for(j = x; j < 3; j++)
+				{	
+				
+					board[i][x] = mvprintw(y+i, x+j,"%c", tBrick[i][j]);			
+
+				}
+			}
+			refresh();
 			break;
 		case KEY_DOWN:  
 			y++;
