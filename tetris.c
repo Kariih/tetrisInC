@@ -6,8 +6,8 @@
 #define delay 1000
 #define WIDTH 10
 #define HEIGHT 20
-#define BRICK_WIDTH 3
-#define BRICK_HEIGHT 3
+#define BLOCK_WIDTH 3
+#define BLOCK_HEIGHT 3
 
 typedef unsigned int Byte;
 typedef unsigned char Color;
@@ -18,7 +18,7 @@ typedef struct {
 } Position;
 
 typedef struct {
-	Byte bricks[BRICK_WIDTH][BRICK_HEIGHT];
+	Byte blocks[BLOCK_WIDTH][BLOCK_HEIGHT];
 	Color color;
 	Position position;
 } Block;
@@ -28,6 +28,37 @@ typedef Byte Map[HEIGHT][WIDTH];
 Block block;
 Map map;
 
+void NewBlock(Block * block) {
+	memset(block->blocks, 0, BLOCK_WIDTH * BLOCK_HEIGHT);		
+
+	int block_id = rand() % 7;
+
+	switch(block_id) {
+		default:
+			block->blocks[0][1] = 1;
+			block->blocks[1][1] = 1;
+			block->blocks[2][1] = 1;			
+		break;
+	}
+
+	block->position.x = 3;
+	block->position.y = 0;
+
+	//attron(1);
+}
+
+void MergeBlock() {
+	for(int y = 0; y < BLOCK_HEIGHT; y++) {
+		for(int x = 0; x < BLOCK_WIDTH; x++) {
+			int y1 = block.position.y + y;
+			int x1 = block.position.x + x;
+
+			if(block.blocks[y][x] == 1) {
+				map[y1][x1] = 1;
+			}
+		}
+	}
+}
 
 void HandleInput() {
 	int ch = getch();
@@ -45,15 +76,14 @@ void HandleInput() {
 }
 
 void Update() {
-	block.position.y++;
-	if(block.position.y > (HEIGHT - 4)) {
-		block.position.y = 1;
-	}		
+	if(block.position.y == HEIGHT - 3) {
+		MergeBlock();
+		NewBlock(&block);
+	}
+	block.position.y++;	
 }
 
-void RenderChar(char ch, int x, int y) {
-	mvaddch(y, x, ch);
-}
+void RenderChar(char ch, int x, int y) { mvaddch(y, x, ch); }
 
 void RenderMap() {
 	// Render edges
@@ -69,7 +99,7 @@ void RenderMap() {
 	for(int y = 0; y < HEIGHT; y++) {
 		for(int x = 0; x < WIDTH; x++) {
 			if(map[y][x] == 0) {
-				RenderChar('.', x + 1, y + 1);
+				RenderChar('+', x + 1, y + 1);
 			} else {
 				RenderChar('#', x + 1, y + 1);
 			}
@@ -78,15 +108,13 @@ void RenderMap() {
 }
 
 void RenderBlock() {
-	for(int y = 0; y < BRICK_HEIGHT; y++) {
-		for(int x = 0; x < BRICK_HEIGHT; x++) {
-			int y1 = block.position.y + y;
-			int x1 = block.position.x + x;			
+	for(int y = 0; y < BLOCK_HEIGHT; y++) {
+		for(int x = 0; x < BLOCK_HEIGHT; x++) {
+			int y1 = block.position.y + y + 1;
+			int x1 = block.position.x + x + 1;			
 
-			if(block.bricks[y][x] == 1) {
-				RenderChar('@', 
-					block.position.x + x, 
-					block.position.y + y);
+			if(block.blocks[y][x] == 1) {
+				RenderChar('@', x1, y1);
 			}
 		}
 	}
@@ -108,21 +136,6 @@ int loop() {
 	}
 }
 
-void NewBrick(Block * block) {
-	memset(block->bricks, 0, BRICK_WIDTH * BRICK_HEIGHT);		
-
-	int block_id = rand() % 7;
-
-	switch(block_id) {
-		default:
-			block->bricks[0][1] = 1;
-			block->bricks[1][1] = 1;
-			block->bricks[2][1] = 1;			
-		break;
-	}
-
-	//attron(1);
-}
 
 
 int main(int argc, char** argv) {
@@ -138,9 +151,7 @@ int main(int argc, char** argv) {
 	nodelay(stdscr, TRUE);
 	timeout(delay);	
 
-	NewBrick(&block);
-	block.position.x = 5;
-	block.position.y = 2;
+	NewBlock(&block);
 
 	loop();
 
