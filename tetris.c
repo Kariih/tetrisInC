@@ -65,22 +65,45 @@ void HandleInput() {
 	switch(ch) {
 		case KEY_LEFT:
 			block.position.x--;
+			if(HasCrashed()) block.position.x++;
 		break;
 		case KEY_RIGHT:
 			block.position.x++;
+			if(HasCrashed()) block.position.x--;
 		break;
 		case KEY_DOWN:
 			block.position.y++;
+			if(HasCrashed()) block.position.y--;
 		break;
 	}
 }
 
+int HasCrashed() {
+	if(block.position.y == HEIGHT - 2) {
+		return 1;
+	}
+
+	for(int y = 0; y < BLOCK_HEIGHT; y++) {
+		for(int x = 0; x < BLOCK_WIDTH; x++) {
+			int y1 = block.position.y + y;
+			int x1 = block.position.x + x;
+
+			if(block.blocks[y][x] == 1 && map[y1][x1] == 1) {
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
 void Update() {
-	if(block.position.y == HEIGHT - 3) {
+	block.position.y++;
+	if(HasCrashed()) {
+		block.position.y--;
 		MergeBlock();
 		NewBlock(&block);
 	}
-	block.position.y++;	
 }
 
 void RenderChar(char ch, int x, int y) { mvaddch(y, x, ch); }
