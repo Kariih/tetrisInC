@@ -46,7 +46,7 @@ void HandleInput() {
 
 void Update() {
 	block.position.y++;
-	if(block.position.y > (HEIGHT - 2)) {
+	if(block.position.y > (HEIGHT - 4)) {
 		block.position.y = 1;
 	}		
 }
@@ -56,12 +56,23 @@ void RenderChar(char ch, int x, int y) {
 }
 
 void RenderMap() {
-	for(int y = 0; y < HEIGHT; y++) {
-		if(y == 0 || y == (HEIGHT - 1)) {
-			for(int x = 0; x < WIDTH; x++,RenderChar('-', x, y));
+	// Render edges
+	for(int y = 0; y < HEIGHT + 2; y++) {
+		if(y == 0 || y == HEIGHT + 1) {
+			for(int x = 0; x <= WIDTH + 1; RenderChar('#', x, y), x++);
 		} else {
-			RenderChar('|', 0, y);
-			RenderChar('|', WIDTH, y);
+			RenderChar('|',         0, y);
+			RenderChar('|', WIDTH + 1, y);
+		}
+	}
+	// Render values
+	for(int y = 0; y < HEIGHT; y++) {
+		for(int x = 0; x < WIDTH; x++) {
+			if(map[y][x] == 0) {
+				RenderChar('.', x + 1, y + 1);
+			} else {
+				RenderChar('#', x + 1, y + 1);
+			}
 		}
 	}
 }
@@ -110,7 +121,7 @@ void NewBrick(Block * block) {
 		break;
 	}
 
-	//attron(block_id);
+	//attron(1);
 }
 
 
