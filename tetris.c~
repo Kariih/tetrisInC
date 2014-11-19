@@ -34,10 +34,10 @@ void NewBlock(Block * block) {
 
 	switch(block_id) {
 		case 0:
-			block->blocks[1][0] = 1;
+			block->blocks[0][1] = 1;
 			block->blocks[1][1] = 1;
-			block->blocks[1][2] = 1;
-			block->blocks[0][1] = 1;			
+			block->blocks[2][1] = 1;
+			block->blocks[1][2] = 1;			
 		break;
 		case 1:
 			block->blocks[0][0] = 1;

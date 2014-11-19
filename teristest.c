@@ -27,51 +27,17 @@ typedef Byte Map[HEIGHT][WIDTH];
 
 Block block;
 Map map;
+
 void NewBlock(Block * block) {
 	memset(block, 0, sizeof(Block));		
 
 	int block_id = rand() % 7;
 
 	switch(block_id) {
-		case 0:
-			block->blocks[1][0] = 1;
+		default:
+			block->blocks[0][1] = 1;
 			block->blocks[1][1] = 1;
 			block->blocks[1][2] = 1;
-			block->blocks[0][1] = 1;			
-		break;
-		case 1:
-			block->blocks[0][0] = 1;
-			block->blocks[0][1] = 1;
-			block->blocks[1][0] = 1;
-			block->blocks[1][1] = 1;			
-		break;
-		case 2:
-			block->blocks[0][0] = 1;
-			block->blocks[0][1] = 1;
-			block->blocks[0][2] = 1;
-			block->blocks[1][2] = 1;			
-		break;
-		case 3:
-			block->blocks[0][0] = 1;
-			block->blocks[1][0] = 1;
-			block->blocks[1][1] = 1;
-			block->blocks[1][2] = 1;			
-		break;
-		case 4:
-			block->blocks[0][1] = 1;
-			block->blocks[0][2] = 1;
-			block->blocks[1][0] = 1;
-			block->blocks[1][1] = 1;			
-		break;
-		case 5:
-			block->blocks[0][0] = 1;
-			block->blocks[0][1] = 1;
-			block->blocks[1][1] = 1;
-			block->blocks[1][2] = 1;			
-		break;
-		case 6:
-			block->blocks[0][1] = 1;
-			block->blocks[1][1] = 1;
 			block->blocks[2][1] = 1;			
 		break;
 	}
