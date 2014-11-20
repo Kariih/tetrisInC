@@ -7,8 +7,8 @@
 
 #define WIDTH 10
 #define HEIGHT 20
-#define BLOCK_WIDTH 3
-#define BLOCK_HEIGHT 3
+#define BLOCK_WIDTH 4
+#define BLOCK_HEIGHT 4
 
 typedef unsigned int Byte;
 typedef unsigned char Color;
@@ -101,7 +101,8 @@ void NewBlock(Block * block) {
 			//Line
 			block->blocks[0][1] = 1;
 			block->blocks[1][1] = 1;
-			block->blocks[2][1] = 1;			
+			block->blocks[2][1] = 1;	
+			block->blocks[3][1] = 1;		
 		break;
 	}
 
@@ -288,7 +289,7 @@ void RotateBlock()
 	{
 		for(j = 0; j < BLOCK_WIDTH; j++) 
 		{
-			block.blocks[i][j] = tempBlock.blocks[2 - j][i];
+			block.blocks[i][j] = tempBlock.blocks[3 - j][i];
 		}
 	}
 	
@@ -491,7 +492,7 @@ void playmusic()
 		libvlc_media_player_play(mediaplayer);
 		isPlaying = 1;
 	}
-	if(times > 50)
+	if(times > 20)
 	{
 		isPlaying = libvlc_media_player_is_playing(mediaplayer);
 		times  = 0;
