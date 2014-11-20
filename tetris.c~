@@ -151,6 +151,8 @@ void restart()
 		}
 	}
 	holdblock.color = 0;
+	holdblock.position.x = 0;
+	holdblock.position.y = 0;
 }
 
 //check if game over and make game over screen
