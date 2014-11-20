@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <vlc/vlc.h>
 
 #define WIDTH 10
 #define HEIGHT 20
@@ -12,12 +13,14 @@
 typedef unsigned int Byte;
 typedef unsigned char Color;
 
-typedef struct {
+typedef struct 
+{
 	int x;
 	int y;
 } Position;
 
-typedef struct {
+typedef struct 
+{
 	Byte blocks[BLOCK_WIDTH][BLOCK_HEIGHT];
 	Color color;
 	Position position;
@@ -29,14 +32,22 @@ Block block;
 Block nextblock;
 Block holdblock;
 
+libvlc_instance_t *inst;
+libvlc_media_player_t *mediaplayer;
+libvlc_media_t *media;
+
 Map map;
 int delay = 500;
 
 //find other place for this
-int point;
 int hold = 0;
 int stoploop = 1;
 int pauseKey = 0;
+int point;
+int isPlaying = 0;
+int times;
+int game = 1;
+
 
 void NewBlock(Block * block) {
 	memset(block, 0, sizeof(Block));		
@@ -97,15 +108,39 @@ void NewBlock(Block * block) {
 	block->position.x = 3;
 	block->position.y = 0;
 	
-	init_pair(1, COLOR_MAGENTA, COLOR_BLACK);
-	init_pair(2, COLOR_YELLOW, COLOR_BLACK);
-	init_pair(3, COLOR_BLUE, COLOR_BLACK);
-	init_pair(4, COLOR_WHITE, COLOR_BLACK);
-	init_pair(5, COLOR_RED, COLOR_BLACK);
-	init_pair(6, COLOR_GREEN, COLOR_BLACK);
-	init_pair(7, COLOR_CYAN, COLOR_BLACK);
+	init_pair(1, COLOR_MAGENTA, COLOR_WHITE);
+	init_pair(2, COLOR_YELLOW, COLOR_WHITE);
+	init_pair(3, COLOR_BLUE, COLOR_WHITE);
+	init_pair(4, COLOR_BLACK, COLOR_WHITE);
+	init_pair(5, COLOR_RED, COLOR_WHITE);
+	init_pair(6, COLOR_GREEN, COLOR_WHITE);
+	init_pair(7, COLOR_CYAN, COLOR_WHITE);
+	init_pair(8, COLOR_MAGENTA, COLOR_BLACK);
+	init_pair(9, COLOR_YELLOW, COLOR_BLACK);
+	init_pair(10, COLOR_BLUE, COLOR_BLACK);
+	init_pair(11, COLOR_WHITE, COLOR_BLACK);
+	init_pair(12, COLOR_RED, COLOR_BLACK);
+	init_pair(13, COLOR_GREEN, COLOR_BLACK);
+	init_pair(14, COLOR_CYAN, COLOR_BLACK);
+	init_pair(15, COLOR_WHITE, COLOR_WHITE);
 
 	block->color = blockId +1;
+}
+void restart()
+{
+	point = 0;
+	int x, y;
+	for(y = 0; y < HEIGHT; y++)
+	{
+		for(x = 0; x < WIDTH; x++)
+		{
+			map[y][x] = 0;						
+		}
+	}
+	NewBlock(&block);
+	NewBlock(&nextblock);
+	Block temp;
+	holdblock = temp;
 }
 void gameOver()
 {	
@@ -117,17 +152,28 @@ void gameOver()
 			int i;
 			for(i = 0; i < 7; i++)
 			{
-			attron(COLOR_PAIR(i+1));
+			attron(COLOR_PAIR(i+1+7));
 			mvprintw(7+i,0,"GAMEOVER!GAMEOVER!");
-			attroff(COLOR_PAIR(i+1));			
+			attroff(COLOR_PAIR(i+1+7));			
 			}
-		refresh();
-		while(1){}
+			refresh();
+			game = 0;
+			while(game == 0)
+			{
+				mvprintw(16, 20, "PRESS R TO RESTART");	
+				refresh();
+				if(getch() == 'r')
+				{	
+					restart();
+					game = 1;
+				}	
+			}
 		}
 	}	
 
 }
-void MergeBlock() {
+void MergeBlock() 
+{
 	int y, x;
 	for(y = 0; y < BLOCK_HEIGHT; y++) {
 		for(x = 0; x < BLOCK_WIDTH; x++) {
@@ -158,11 +204,11 @@ void points(rows)
 			delay -= 60;
 			break;
 	}
-	if(delay < 100)
+	if(delay < 50)
 	{
-		delay = 100;
+		delay = 50;
 	}
-	mvprintw(20, 20, "your score is: %d and speed is: %d", point, delay);
+	mvprintw(20, 20, "your score is: %d", point);
 }
 void moverows(int start)
 {
@@ -201,7 +247,8 @@ void checkIfFullLine()
 	}
 	points(rows);
 }
-int HasCrashed() {
+int HasCrashed() 
+{
 	int y, x;
 	for(y = 0; y < BLOCK_HEIGHT; y++) {
 		for(x = 0; x < BLOCK_WIDTH; x++) {
@@ -233,16 +280,20 @@ int IsWithinMap() {
 	return 1;
 }
 
-void RotateBlock() {
+void RotateBlock() 
+{
 	Block tempBlock = block;
 	int i, j;
-	for (i = 0; i < BLOCK_HEIGHT; i++) {
-		for(j = 0; j < BLOCK_WIDTH; j++) {
+	for (i = 0; i < BLOCK_HEIGHT; i++)
+	{
+		for(j = 0; j < BLOCK_WIDTH; j++) 
+		{
 			block.blocks[i][j] = tempBlock.blocks[2 - j][i];
 		}
 	}
 	
-	if(HasCrashed() || !IsWithinMap()) {
+	if(!IsWithinMap()) 
+	{
 		block = tempBlock;
 	}
 }
@@ -253,16 +304,18 @@ void renderNextBlock()
 {
 		mvprintw(1, 20, "Next block is:");
 		int x, y;
-		for(y = 0; y < BLOCK_HEIGHT; y++) {
-			for(x = 0; x < BLOCK_HEIGHT; x++) {
+		for(y = 0; y < BLOCK_HEIGHT; y++) 
+		{
+			for(x = 0; x < BLOCK_HEIGHT; x++) 
+			{
 				int y1 = 2 + y;
 				int x1 = 25 + x;			
 			
-				attron(COLOR_PAIR(nextblock.color));
+				attron(COLOR_PAIR(nextblock.color + 7));
 				if(nextblock.blocks[y][x] == 1) {
 					RenderChar('X', x1, y1);
 				}
-				attroff(COLOR_PAIR(nextblock.color));
+				attroff(COLOR_PAIR(nextblock.color + 7));
 			}
 		}
 }
@@ -271,21 +324,25 @@ void renderHoldBlock()
 {
 		mvprintw(6, 20, "Holded block is:");
 		int x, y;
-		for(y = 0; y < BLOCK_HEIGHT; y++) {
-			for(x = 0; x < BLOCK_HEIGHT; x++) {
+		for(y = 0; y < BLOCK_HEIGHT; y++) 
+		{
+			for(x = 0; x < BLOCK_HEIGHT; x++) 
+			{
 				int y1 = 7 + y;
 				int x1 = 25 + x;			
 			
-				attron(COLOR_PAIR(holdblock.color));
-				if(holdblock.blocks[y][x] == 1) {
+				attron(COLOR_PAIR(holdblock.color + 7));
+				if(holdblock.blocks[y][x] == 1) 
+				{
 					RenderChar('X', x1, y1);
 				}
-				attroff(COLOR_PAIR(holdblock.color));
+				attroff(COLOR_PAIR(holdblock.color + 7));
 			}
 		}
 }
 
-int HandleInput(int times) {
+int HandleInput(int times) 
+{
 	int ch = getch();
 	switch(ch) {
 		case KEY_LEFT:
@@ -336,14 +393,18 @@ int HandleInput(int times) {
 				}
 			}
 		break;
-		
+		case 'r':
+			refresh();
+		break;
 	}
 	return times;
 }
 
-void Update() {
+void Update() 
+{
 	block.position.y++;
-	if(HasCrashed()) {
+	if(HasCrashed()) 
+{
 		block.position.y--;
 		MergeBlock();
 		block = nextblock;
@@ -353,21 +414,28 @@ void Update() {
 void RenderMap() {
 	// Render edges
 	int y,x;
-	for(y = 0; y < HEIGHT + 2; y++) {
-		if(y == 0 || y == HEIGHT + 1) {
+	for(y = 0; y < HEIGHT + 2; y++) 
+	{
+		if(y == 0 || y == HEIGHT + 1) 
+		{
 			for(x = 0; x <= WIDTH + 1; RenderChar('-', x, y), x++);
 		} else {
-			RenderChar('|',         0, y);
+			RenderChar('|',0, y);
 			RenderChar('|', WIDTH + 1, y);
 		}
 	}
 	// Render values
 	y = 0;
 	x = 0;
-	for(y = 0; y < HEIGHT; y++) {
-		for(x = 0; x < WIDTH; x++) {
-			if(map[y][x] == 0) {
+	for(y = 0; y < HEIGHT; y++) 
+	{
+		for(x = 0; x < WIDTH; x++) 
+		{
+			if(map[y][x] == 0) 
+			{
+				attron(COLOR_PAIR(15));
 				RenderChar(' ', x + 1, y + 1);
+				attron(COLOR_PAIR(15));
 			} else {
 				int color = map[y][x];
 				attron(COLOR_PAIR(color));
@@ -378,22 +446,27 @@ void RenderMap() {
 	}
 }
 
-void RenderBlock() {
+void RenderBlock() 
+{
 	int x, y;
-	for(y = 0; y < BLOCK_HEIGHT; y++) {
-		for(x = 0; x < BLOCK_HEIGHT; x++) {
+	for(y = 0; y < BLOCK_HEIGHT; y++) 
+	{
+		for(x = 0; x < BLOCK_HEIGHT; x++) 
+		{
 			int y1 = block.position.y + y + 1;
 			int x1 = block.position.x + x + 1;			
 			
 			attron(COLOR_PAIR(block.color));
-			if(block.blocks[y][x] == 1) {
+			if(block.blocks[y][x] == 1) 
+			{
 				RenderChar('X', x1, y1);
 			}
 			attroff(COLOR_PAIR(block.color));
 		}
 	}
 }
-int Render() {
+int Render() 
+{
 	erase();
 	checkIfFullLine();
 	RenderMap();
@@ -407,13 +480,35 @@ int Render() {
 	gameOver();
 	refresh();
 } 
-int loop() {
+void playmusic()
+{
+	if(isPlaying == 0)
+	{
+		inst = libvlc_new(0, NULL);
+		media = libvlc_media_new_path(inst, "Tetris.mp3");
+		mediaplayer = libvlc_media_player_new_from_media(media);
+		libvlc_media_release(media);	    
+		libvlc_media_player_play(mediaplayer);
+		isPlaying = 1;
+	}
+	if(times > 20)
+	{
+		isPlaying = libvlc_media_player_is_playing(mediaplayer);
+		times  = 0;
+	}
+	times++;
+	
+}
+int loop() 
+{
 	int times = 0;
 	
-	while(1) {
+	while(game) 
+	{
 		times = HandleInput(times);
 		Update();
 		timeout(delay);
+			playmusic();
 		if (times == 2)
 		{
 			block.position.y--;
@@ -422,10 +517,10 @@ int loop() {
 		Render();
 	}
 }
-
-int main(int argc, char** argv) {
+int main(int argc, char** argv) 
+{
 	initscr();
-
+	
 	start_color();
 	noecho();
 	cbreak();
@@ -437,9 +532,14 @@ int main(int argc, char** argv) {
 	NewBlock(&block);
 	NewBlock(&nextblock);
 
+
+
 	loop();
 
 	endwin();
+	libvlc_media_player_stop(mediaplayer);
+    libvlc_media_player_release(mediaplayer);
+    libvlc_release(inst);
 
 	return 0;
 }
