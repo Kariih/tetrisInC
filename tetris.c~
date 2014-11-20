@@ -118,7 +118,7 @@ void gameOver()
 			for(i = 0; i < 7; i++)
 			{
 			attron(COLOR_PAIR(i+1));
-			mvprintw(7+i,0,"GAMEOVER!GAMEOVER!");
+			mvprintw(15+i,0,"GAMEOVER!GAMEOVER!");
 			attroff(COLOR_PAIR(i+1));			
 			}
 		refresh();
